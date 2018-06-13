@@ -349,6 +349,7 @@ get_huber_plot_support <- function(density_p0 = list(type = "normal"
 #' @param scale_factor
 #'
 #' @return
+#' @export
 compare_pred_sets <- function(density_p0 = list(type = "normal", mean = 0, sd = 1),
                               density_q  = list(type = "normal", mean = 5, sd = 1),
                               eps = 0.2, alpha = 0.05,
