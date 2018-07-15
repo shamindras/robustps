@@ -16,14 +16,22 @@ gen_density <- function(density_list){
         out <- function(x){stats::dnorm(x = x,
                                         mean = density_list$mean,
                                         sd = density_list$sd)}
-    }else if(density_type == "exponential"){
+    } else if(density_type == "exponential"){
         out <- function(x){stats::dexp(x = x, rate = density_list$rate)}
     } else if(density_type == "uniform"){
         out <- function(x){stats::dunif(x = x,
                                         min = density_list$min,
                                         max = density_list$max)}
+    } else if(density_type == "pareto"){
+        out <- function(x){stats::dpareto(x = x,
+                                          location = density_list$location,
+                                          shape = density_list$shape)}
+    } else if(density_type == "cauchy"){
+        out <- function(x){stats::dcauchy(x = x,
+                                          location = density_list$location,
+                                          scale = density_list$scale)}
     }
-
+    # Return the specified distribution function
     base::return(out)
 }
 
@@ -73,10 +81,36 @@ get_known_level_set <- function(density_list, alpha){
                     end_point_upper = end_point_upper,
                     optimal_level = optimal_level,
                     lebesgue_measure = end_point_upper - end_point_lower)
+    } else if(density_type == "cauchy"){
+        end_point_lower <- qcauchy(p = -alpha/2,
+                                   location = density_list$location,
+                                   scale = density_list$scale)
+        end_point_upper <- qcauchy(p = 1 - alpha/2,
+                                   location = density_list$location,
+                                   scale = density_list$scale)
+        optimal_level   <- dcauchy(x = end_point_upper,
+                                   location = density_list$location,
+                                   scale = density_list$scale)
+        out <- list(end_point_lower = end_point_lower,
+                    end_point_upper = end_point_upper,
+                    optimal_level = optimal_level,
+                    lebesgue_measure = end_point_upper - end_point_lower)
     } else if(density_type == "exponential"){
         end_point_lower <- 0
         end_point_upper <- qexp(p = alpha, rate = density_list$rate)
         optimal_level   <- dexp(x = end_point_upper, rate = density_list$rate)
+        out <- list(end_point_lower = end_point_lower,
+                    end_point_upper = end_point_upper
+                    , optimal_level = optimal_level
+                    , lebesgue_measure = end_point_upper - end_point_lower)
+    } else if(density_type == "pareto"){
+        end_point_lower <- 0
+        end_point_upper <- qpareto(p = alpha,
+                                   location = density_list$location,
+                                   shape = density_list$shape)
+        optimal_level   <- dpareto(x = end_point_upper,
+                                   location = density_list$location,
+                                   shape = density_list$shape)
         out <- list(end_point_lower = end_point_lower,
                     end_point_upper = end_point_upper
                     , optimal_level = optimal_level
@@ -115,8 +149,16 @@ gen_distribution <- function(density_list){
         out <- function(x){pnorm(q = x
                                  , mean = density_list$mean
                                  , sd = density_list$sd)}
-    }else if(density_type == "exponential"){
+    } else if(density_type == "cauchy"){
+        out <- function(x){pcauchy(q = x,
+                                   location = density_list$location,
+                                   scale = density_list$scale)}
+    } else if(density_type == "exponential"){
         out <- function(x){pexp(q = x, rate = density_list$rate)}
+    } else if(density_type == "pareto"){
+        out <- function(x){ppareto(q = x,
+                                   location = density_list$location,
+                                   shape = density_list$shape)}
     } else if(density_type == "uniform"){
         out <- function(x){punif(q = x
                                  , min = density_list$min
@@ -297,15 +339,33 @@ get_density_plot_support <- function(density_list, scale_factor = 5){
     density_type <- density_list$type
 
     if(density_type == "normal"){
-        out <- list(min = density_list$mean - scale_factor*density_list$sd,
-                    max = density_list$mean + scale_factor*density_list$sd)
-    }else if(density_type == "exponential"){
+        mean <- density_list$mean
+        sd <- density_list$sd
+        out <- list(min = mean - scale_factor*sd,
+                    max = mean + scale_factor*sd)
+    } else if(density_type == "cauchy"){
+        location <- density_list$location
+        scale <- density_list$scale
+        out <- list(min = location - scale_factor*scale,
+                    max = location + scale_factor*scale)
+    } else if(density_type == "exponential"){
+        rate <- density_list$rate
         out <- list(min = 0,
-                    max = density_list$mean + scale_factor*density_list$sd)
+                    # max = density_list$mean + scale_factor*density_list$sd
+                    max = 1/rate +
+                        scale_factor*(1/rate))
+    } else if(density_type == "pareto"){
+        location <- density_list$location
+        shape <- density_list$shape
+        out <- list(min = 0,
+                    max = (shape*location)/(shape - 1) +
+                        scale_factor*((location^2 * shape)/((shape - 1)^2*(shape - 2))))
     } else if(density_type == "uniform"){
-        tot_diff <- density_list$max - density_list$min
-        out <- list(min = density_list$min - scale_factor * tot_diff,
-                    max = density_list$max + scale_factor * tot_diff)
+        min <- density_list$min
+        max <- density_list$max
+        tot_diff <- max - min
+        out <- list(min = min - scale_factor * tot_diff,
+                    max = max + scale_factor * tot_diff)
     }
 
     base::return(out)
