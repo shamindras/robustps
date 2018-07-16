@@ -10,7 +10,8 @@ ByteCompile: true
 Imports: 
     tidyverse,
     magrittr,
-    rlang (>= 0.1.2)
+    rlang (>= 0.1.2),
+    VGAM
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.0.1
 Suggests: 

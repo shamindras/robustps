@@ -23,8 +23,8 @@ gen_density <- function(density_list){
                                         min = density_list$min,
                                         max = density_list$max)}
     } else if(density_type == "pareto"){
-        out <- function(x){stats::dpareto(x = x,
-                                          location = density_list$location,
+        out <- function(x){VGAM::dpareto(x = x,
+                                          scale = density_list$scale,
                                           shape = density_list$shape)}
     } else if(density_type == "cauchy"){
         out <- function(x){stats::dcauchy(x = x,
@@ -105,11 +105,11 @@ get_known_level_set <- function(density_list, alpha){
                     , lebesgue_measure = end_point_upper - end_point_lower)
     } else if(density_type == "pareto"){
         end_point_lower <- 0
-        end_point_upper <- qpareto(p = alpha,
-                                   location = density_list$location,
+        end_point_upper <- VGAM::qpareto(p = alpha,
+                                   scale = density_list$scale,
                                    shape = density_list$shape)
-        optimal_level   <- dpareto(x = end_point_upper,
-                                   location = density_list$location,
+        optimal_level   <- VGAM::dpareto(x = end_point_upper,
+                                   scale = density_list$scale,
                                    shape = density_list$shape)
         out <- list(end_point_lower = end_point_lower,
                     end_point_upper = end_point_upper
@@ -156,8 +156,8 @@ gen_distribution <- function(density_list){
     } else if(density_type == "exponential"){
         out <- function(x){pexp(q = x, rate = density_list$rate)}
     } else if(density_type == "pareto"){
-        out <- function(x){ppareto(q = x,
-                                   location = density_list$location,
+        out <- function(x){VGAM::ppareto(q = x,
+                                   scale = density_list$scale,
                                    shape = density_list$shape)}
     } else if(density_type == "uniform"){
         out <- function(x){punif(q = x
@@ -355,11 +355,11 @@ get_density_plot_support <- function(density_list, scale_factor = 5){
                     max = 1/rate +
                         scale_factor*(1/rate))
     } else if(density_type == "pareto"){
-        location <- density_list$location
+        scale <- density_list$scale
         shape <- density_list$shape
         out <- list(min = 0,
-                    max = (shape*location)/(shape - 1) +
-                        scale_factor*((location^2 * shape)/((shape - 1)^2*(shape - 2))))
+                    max = (shape*scale)/(shape - 1) +
+                        scale_factor*((scale^2 * shape)/((shape - 1)^2*(shape - 2))))
     } else if(density_type == "uniform"){
         min <- density_list$min
         max <- density_list$max
