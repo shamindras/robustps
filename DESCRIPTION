@@ -11,8 +11,10 @@ Imports:
     tidyverse,
     magrittr,
     rlang (>= 0.1.2),
-    VGAM
+    VGAM,
+    mvtnorm,
+    ks
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Suggests: 
     testthat
