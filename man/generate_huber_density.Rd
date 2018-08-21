@@ -4,8 +4,8 @@
 \alias{generate_huber_density}
 \title{Generate the required huber density function}
 \usage{
-generate_huber_density(density_p0 = list(type = "normal", mean = 0, sd = 1),
-  density_q = list(type = "normal", mean = 0, sd = 1), eps)
+generate_huber_density(density_p0 = list(type = "normal", mean = 0, sd =
+  1), density_q = list(type = "normal", mean = 0, sd = 1), eps)
 }
 \arguments{
 \item{eps}{}
