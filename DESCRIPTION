@@ -13,8 +13,13 @@ Imports:
     rlang (>= 0.1.2),
     VGAM,
     mvtnorm,
-    ks
+    ks,
+    janitor,
+    glue,
+    latex2exp,
+    purrr,
+    ggplot2
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Suggests: 
     testthat
