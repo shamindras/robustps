@@ -7,9 +7,14 @@
 # TODO: Delete this and move to package dependencies
 # The xfun package needs to be separately installed (if not already on your
 # system). So simply run the following line of code:
-# install.packages("xfun")
-pckgs <- c("here", "MASS", "tidyverse")
+# install.packages(c("xfun", "here", "MASS", "tidyverse", "conflicted"))
+pckgs <- c("here", "MASS", "tidyverse", "conflicted")
 xfun::pkg_attach2(pckgs)
+
+# Source GLOBAL files ----------------------------------------------------------
+# We can source all R files from our core functions
+fs::dir_ls(here::here("R"), glob = "*.R") %>%
+    purrr::walk(.x = ., .f = ~base::source(file = .x))
 
 # Define GLOBAL functions ------------------------------------------------------
 

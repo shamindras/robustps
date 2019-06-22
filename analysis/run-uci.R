@@ -1,10 +1,26 @@
-# General Description ----
+# General Description ----------------------------------------------------------
 # Here we will download several open-source binary classification datasets
 # from the UCI machine learning repository. The goal is to construct
 # semi-synthetic datasets i.e. take one of the binary classes as a "true" class
 # and sample from the other binary class as a "contamination" class so that the
 # empirical proportion of contamination/ true class number observations is held
 # at a specified epsilon level
+
+# Setup ------------------------------------------------------------------------
+# TODO: Delete this and move to package dependencies
+# The xfun package needs to be separately installed (if not already on your
+# system). So simply run the following line of code:
+# install.packages(c("xfun", "here", "MASS", "tidyverse", "conflicted"))
+pckgs <- c("here", "tidyverse", "conflicted")
+xfun::pkg_attach2(pckgs)
+
+# Need to install the patchwork plot library through devtools
+devtools::install_github("thomasp85/patchwork")
+
+# Source GLOBAL files ----------------------------------------------------------
+# We can source all R files from our core functions
+fs::dir_ls(here::here("R"), glob = "*.R") %>%
+    purrr::walk(.x = ., .f = ~base::source(file = .x))
 
 # Global Parameters ------------------------------------------------------------
 MAIN_UCI_DATA_URL <- stringr::str_c("https://archive.ics.uci.edu",
@@ -24,9 +40,9 @@ banknote_col_names_raw <- c("VARIANCE_WAVELET","SKEWNESS_WAVELET",
 banknote_col_types_raw = c("ddddf")
 
 # Get the UCI banknote Data
-bn_uci_dat <- robustps::get_uci_data(ucidurl = banknote_uci_url,
-                                     col_names_raw = banknote_col_names_raw,
-                                     col_types_raw = banknote_col_types_raw)
+bn_uci_dat <- get_uci_data(ucidurl = banknote_uci_url,
+                           col_names_raw = banknote_col_names_raw,
+                           col_types_raw = banknote_col_types_raw)
 
 # bn_uci_dat %>%
 #     ggplot2::ggplot(data = ., aes(x = variance_wavelet,
@@ -38,7 +54,7 @@ bn_uci_dat <- robustps::get_uci_data(ucidurl = banknote_uci_url,
 # Note we have applied an extra filter here to split the classes further
 # This is with the benefit of hindsight so that we get separated classes
 bn_uci_dat2 <- bn_uci_dat %>%
-    dplyr::filter(!(class == "0" & variance_wavelet < 1.5))
+                   dplyr::filter(!(class == "0" & variance_wavelet < 1.5))
 
 ds_name <- "UCI Banknote Data"
 plt_vars <- c("variance_wavelet", "skewness_wavelet", "class")
