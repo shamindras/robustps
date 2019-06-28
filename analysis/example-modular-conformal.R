@@ -138,13 +138,13 @@ SEED_VAL <- 78655256
 base::set.seed(seed = SEED_VAL)
 
 # Define epsilon and alpha values
-EPSILON <- 0.2
+EPSILON <- 0.1
 ALPHA <- 0.05
 
 # Generate bivariate normal (BVN) data -----------------------------------------
 
 # Core BVN parameters
-NUM_OBS <- 200
+NUM_OBS <- 1000
 
 # Covariance matrix
 I <- base::diag(x = c(1, 1)) # identity matrix
@@ -177,11 +177,12 @@ bvn_sim_cont_df <- gen_huber_samples_nd(density_p0 =
                                                   sigma = base::matrix(
                                                       c(10,3,3,2), 2, 2)),
                                          eps = EPSILON,
-                                         n_samples = NUM_OBS)
-
+                                         n_samples = NUM_OBS) %>%
+                        dplyr::mutate(.data = ., compts =
+                                          forcats::as_factor(compts))
 
 bvn_sim_cont_df %>%
-    ggplot2::ggplot(data = ., aes(x = V1, y = V2)) +
+    ggplot2::ggplot(data = ., aes(x = V1, y = V2, col = compts)) +
     ggplot2::geom_point() +
     ggplot2::geom_density_2d()
 
