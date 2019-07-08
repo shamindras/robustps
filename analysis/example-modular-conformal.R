@@ -221,7 +221,7 @@ mean_diff_vec_norms <- mean_diff_vec %>%
                                        .f = ~base::norm(x = .x, type = "2"))
 
 # Compute the appropriate quantile threshold -----------------------------------
-new_thresh_qtil <- EPSILON*(1 - ALPHA)
+new_thresh_qtil <- (1 - ALPHA)
 new_thresh_qtil <- mean_diff_vec_norms %>%
                     stats::quantile(x = .,
                                     probs = c(1 - new_thresh_qtil),
@@ -230,6 +230,9 @@ new_thresh_qtil <- mean_diff_vec_norms %>%
 
 # Apply the threshold and retrieve the confidence set  -------------------------
 conf_set <- mean_diff_vec_norms[mean_diff_vec_norms >= new_thresh_qtil]
+# DO this on the grid
+
+
 
 # Apply the threshold to the validation set
 # Not quite sure how we want to do this here specifically. We can discuss
