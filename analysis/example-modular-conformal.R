@@ -18,31 +18,18 @@ fs::dir_ls(here::here("R"), glob = "*.R") %>%
 
 # Define GLOBAL functions ------------------------------------------------------
 
-#' Get mean of all columns in a dataframe in the form of a tibble
+#' Get summary i.e. mean/median/sd of all columns in a dataframe in the form
+#' of a tibble
 #'
 #' @param inp_df (dataframe) : Input dataframe with only numeric columns
 #'
 #' @return (tibble) : A 1 row tibble containing only the mean of each column of
 #'                    the input dataframe
 #' @export
-mean_df_features <- function(inp_df){
+smry_df_features <- function(inp_df, smry_type){
     inp_df %>%
         dplyr::ungroup() %>%
-        dplyr::summarise_all(.tbl = ., .funs = mean) %>%
-        base::return(.)
-}
-
-#' Get median of all columns in a dataframe in the form of a tibble
-#'
-#' @param inp_df (dataframe) : Input dataframe with only numeric columns
-#'
-#' @return (tibble) : A 1 row tibble containing only the median of each column of
-#'                    the input dataframe
-#' @export
-median_df_features <- function(inp_df){
-    inp_df %>%
-        dplyr::ungroup() %>%
-        dplyr::summarise_all(.tbl = ., .funs = median) %>%
+        dplyr::summarise_all(.tbl = ., .funs = {{ smry_type }}) %>%
         base::return(.)
 }
 
@@ -102,11 +89,15 @@ ALPHA <- 0.05
 
 # Core BVN parameters
 NUM_OBS <- 1000
+BIN_SPLIT_PROP <- 0.5
 
 # Covariance matrix
 I <- base::diag(x = c(1, 1)) # identity matrix
-sigma_mat <- I
-# sigma_mat <- base::matrix(c(10,3,3,2), 2, 2)
+TRUE_SIGMA_MAT <- 2*I
+
+# Contmination
+# CONT_SIGMA_MAT <- base::matrix(c(2,0,0,2), 2, 2)
+CONT_SIGMA_MAT <- 0.5*I
 
 # mean vector
 mu_vec <- c(0, 0)
@@ -127,12 +118,11 @@ bvn_sim_df %>%
 bvn_sim_cont_df <- gen_huber_samples_nd(density_p0 =
                                              list(type = "normal",
                                                   mu_vec = c(0, 0),
-                                                  sigma = I),
+                                                  sigma = TRUE_SIGMA_MAT),
                                          density_q =
                                              list(type = "normal",
                                                   mu_vec = c(3, 3),
-                                                  sigma = base::matrix(
-                                                      c(10,3,3,2), 2, 2)),
+                                                  sigma = CONT_SIGMA_MAT),
                                          eps = EPSILON,
                                          n_samples = NUM_OBS) %>%
                         dplyr::mutate(.data = ., compts =
@@ -145,7 +135,7 @@ bvn_sim_cont_df %>%
 
 # Perform sample splitting of the input data -----------------------------------
 # We perform a binary sample split of the input dataframe
-bin_split_prop <- 0.5
+bin_split_prop <- BIN_SPLIT_PROP
 bin_split_props <- c(bin_split_prop, 1 - bin_split_prop)
 n_obs <- base::nrow(x = bvn_sim_df)
 
@@ -153,20 +143,21 @@ n_obs <- base::nrow(x = bvn_sim_df)
 compts <- base::sample(x = c(1:2), prob = bin_split_props, size = n_obs,
                        replace = TRUE)
 
+# Randomly split the samples in 2 separate dataframes
 split_smpls <- bvn_sim_df %>%
                 dplyr::mutate(.data = ., compts = forcats::as_factor(compts)) %>%
                 dplyr::group_by(.data = ., compts) %>%
                 dplyr::group_split(.tbl = ., keep = FALSE)
-                # purrr::map_int(.x, .f = ~base::nrow(x = .x))
 
 # Compute some central measure on the first of the split datasets --------------
 bvn_sim_samp1_df <- split_smpls[[1]]
 bvn_sim_samp2_df <- split_smpls[[2]]
 
-get_means <- bvn_sim_samp1_df %>% mean_df_features(inp_df = .)
+# Get the sample mean vector
+get_means <- bvn_sim_df %>% smry_df_features(inp_df = ., smry_type = mean)
 
 # Compute the distance measure on the second sample ----------------------------
-mean_diff_vec <- bvn_sim_samp1_df %>%
+mean_diff_vec <- bvn_sim_df %>%
                     purrr::map2_dfc(.x = ., .y = get_means, ~ .x - .y) %>%
                     purrr::pmap(., c, use.names = FALSE)
 
@@ -187,9 +178,26 @@ new_thresh_qtil <- mean_diff_vec_norms %>%
 
 # Apply the threshold and retrieve the confidence set  -------------------------
 conf_set <- mean_diff_vec_norms[mean_diff_vec_norms >= new_thresh_qtil]
+
 # DO this on the grid
+# Grid x sequence
+grid_x_by <- 0.2
+grid_y_by <- 0.2
 
+# Grid end-points (x, y)
+grid_x_min <- -5
+grid_x_max <- 5
+grid_y_min <- -5
+grid_y_max <- 5
 
+# Grid sequence by axis
+grid_x_seq <- base::seq(from = grid_x_min, to = grid_x_max, by = grid_x_by) %>%
+                tibble::enframe(x = ., name = NULL, value = "x")
+grid_y_seq <- base::seq(from = grid_y_min, to = grid_y_max, by = grid_y_by) %>%
+                tibble::enframe(x = ., name = NULL, value = "y")
+
+# Generate the grid
+plt_grid <- grid_x_seq %>% tidyr::crossing(grid_y_seq)
 
 # Apply the threshold to the validation set
 # Not quite sure how we want to do this here specifically. We can discuss
