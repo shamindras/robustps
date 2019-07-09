@@ -160,7 +160,6 @@ get_means <- bvn_sim_df %>% smry_df_features(inp_df = ., smry_type = mean)
 mean_diff_vec <- bvn_sim_df %>%
                     purrr::map2_dfc(.x = ., .y = get_means, ~ .x - .y) %>%
                     purrr::pmap(., c, use.names = FALSE)
-
 mean_diff_vec
 
 # Get the 2-norm difference for the mean vector i.e. the phi function

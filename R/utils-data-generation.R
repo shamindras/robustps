@@ -69,6 +69,29 @@ gen_huber_samples <- function(density_p0 = list(type = "normal"
     base::return(samples_huber)
 }
 
+# Generate Contaminated Multivariate normal Data
+#' Generate specified number of samples from the required density function
+#'
+#' @param density_list
+#' @param n_samples
+#'
+#' @return
+#' @export
+gen_density_samples_nd <- function(density_list, n_samples){
+
+    density_type <- density_list$type
+
+    if(density_type == "normal"){
+        out <- MASS::mvrnorm(n = n_samples,
+                             mu = density_list$mu_vec,
+                             Sigma = density_list$sigma)
+    } else {
+        stop("We only accept normal as our density type currently")
+    }
+
+    base::return(out)
+}
+
 #' Generate specified number of samples from the required Huber density function
 #' NOTE: we are generating samples for, f, g separately and then combining into
 #' an h sample.
