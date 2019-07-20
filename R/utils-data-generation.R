@@ -5,7 +5,7 @@
 #'
 #' @return
 #' @export
-gen_density_samples <- function(density_list, n_samples = 100){
+gen_density_samples_univariate <- function(density_list, n_samples = 100){
 
     density_type <- density_list$type
 
@@ -44,7 +44,7 @@ gen_density_samples <- function(density_list, n_samples = 100){
 #'
 #' @return
 #' @export
-gen_huber_samples <- function(density_p0 = list(type = "normal"
+gen_huber_samples_univariate <- function(density_p0 = list(type = "normal"
                                                 , mean = 0, sd = 1),
                               density_q = list(type = "normal",
                                                mean = 0, sd = 1),
@@ -77,7 +77,7 @@ gen_huber_samples <- function(density_p0 = list(type = "normal"
 #'
 #' @return
 #' @export
-gen_density_samples_nd <- function(density_list, n_samples){
+gen_density_samples_multivariate <- function(density_list, n_samples){
 
     density_type <- density_list$type
 
@@ -104,7 +104,7 @@ gen_density_samples_nd <- function(density_list, n_samples){
 #'
 #' @return
 #' @export
-gen_huber_samples_nd <- function(density_p0 = list(type = "normal",
+gen_huber_samples_multivariate <- function(density_p0 = list(type = "normal",
                                                    mu_vec = 0, sigma = 1),
                                  density_q = list(type = "normal",
                                                   mu_vec = 5, sigma = 1),
